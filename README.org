@@ -1,0 +1,133 @@
+#+OPTIONS: reveal_slide_number:nil toc:nil reveal_title_slide:nil
+#+REVEAL_TRANS: slide
+#+REVEAL_THEME: blood
+#+REVEAL_ROOT: http://cdn.jsdelivr.net/reveal.js/3.0.0/
+
+#+Title: OVH API Dedicated Server Order
+#+Author: Charles Vaillancourt
+#+Email: charles.vaillancourt@corp.ovh.com 
+
+* Brief
+
+This is a small python module and CLI to ease the process of ordering bare-metal servers with the OVH API
+  
+* Getting Ready
+
+** OVH API
+
+Get familiar with the OVH API
+
+https://api.ovh.com/console/
+
+** Python module
+
+Download the python module to interact with the API
+
+https://github.com/ovh/python-ovh
+
+** Accessing the API
+
+Create some tokens for your application or script
+
+https://api.us.ovhcloud.com/createToken/
+https://api.us.ovhcloud.com/createApp/
+
+* Ordering Process
+
+** Create a cart
+First thing to do is creating a cart for this order
+
+#+BEGIN_SRC 
+POST /order/cart
+
+| Req | Field         | Description                            |
+|-----+---------------+----------------------------------------|
+| F   | description   | Description of the cart                |
+| F   | expire        | Time of expiration of the cart         |
+| T   | ovhSubsidiary | OVH Subsidiary where you want to order |
+#+END_SRC
+
+** Search for service
+Now we need to search for the server we want.
+
+#+BEGIN_SRC
+GET /order/catalog/formatted/dedicated 
+
+| Req | Field         | Description                            |
+|-----+---------------+----------------------------------------|
+| T   | ovhSubsidiary | OVH Subsidiary where you want to order |
+#+END_SRC
+
+** Add server to cart
+Once we have selected the server we need to add it to the cart
+
+#+BEGIN_SRC
+POST /order/cart/{cartId}/dedicated 
+
+| Req | Field       | Description                                           |
+|-----+-------------+-------------------------------------------------------|
+| T   | cartId      | Cart identifier                                       |
+| T   | duration    | Duration selected for the purchase of the product     |
+| T   | plancode    | Identifier of a dedicated server offer                |
+| T   | pricingMode | Pricing mode selected for the purchase of the product |
+| T   | quantitiy   | Quantity of product desired                           |
+#+END_SRC
+
+** Configure Server
+Now we need to fetch the configuration options for our server
+
+#+BEGIN_SRC
+GET /order/cart/{cartId}/item
+
+| Req | Field  | Description     |
+|-----+--------+-----------------|
+| T   | cartId | Cart identifier |
+
+GET /order/cart/{cartId}/item/{itemId}/requiredConfiguration
+
+| Req | Field  | Description             |
+|-----+--------+-------------------------|
+| T   | cartId | Cart identifier         |
+| T   | itemId | Product item identifier |
+#+END_SRC
+
+** Post configuration
+Once configured we send the options over
+
+#+BEGIN_SRC
+POST /order/cart/{cartId}/item/{itemId}/configuration 
+
+| Req | Field  | Description                                  |
+|-----+--------+----------------------------------------------|
+| T   | cartId | Cart identifier                              |
+| T   | itemId | Product item identifier                      |
+| T   | label  | Label for your configuration item            |
+| T   | value  | Value or resource of your configuration item |
+#+END_SRC
+
+** Assign cart
+Now we need to assign the cart to our user
+
+#+BEGIN_SRC
+POST /order/cart/{cartId}/assign
+
+| Req | Field  | Description     |
+|-----+--------+-----------------|
+| T   | cartId | Cart identifier |
+#+END_SRC
+
+** Validate and checkout
+And finaly we can checkout our order
+
+#+BEGIN_SRC
+POST /order/cart/{cartId}/checkout
+
+| Req | Field                   | Description                            |
+|-----+-------------------------+----------------------------------------|
+| T   | cartId                  | Cart identifier                        |
+| F   | waiveRetractationPeriod | Indicates that order will be processed |
+|     |                         | with waiving retractation period       |
+#+END_SRC
+
+
+
