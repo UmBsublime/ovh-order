@@ -55,7 +55,7 @@ class ServerOrder:
             self.remove_server_from_cart(item_id)
 
     def delete_cart(self):
-        r = self.client.delete('/order/cart/{}'.format(self.cart_id))
+        self.client.delete('/order/cart/{}'.format(self.cart_id))
 
     def get_carts(self):
         r = self.client.get('/order/cart/')

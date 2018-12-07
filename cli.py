@@ -27,6 +27,7 @@ def cli(ctx, debug, config):
 @cli.command(help='Generate a new cart _OR_ list the contents of a cart')
 @click.option('--cart', '-c',
               default=None,
+              envvar='OVH_CART_ID',
               help="If one is supplied will list the contents of the cart")
 @click.pass_context
 def cart(ctx, cart):
@@ -35,13 +36,14 @@ def cart(ctx, cart):
         order.show_cart()
     else:
         order = ServerOrder(ctx.obj['CLIENT'])
-        click.echo(order.cart_id)
+        click.echo('export OVH_CART_ID={}'.format(order.cart_id))
 
 
 @cli.command()
-@click.argument('cart',
-                required=True)
 @click.argument('server',
+                required=True)
+@click.argument('cart',
+                envvar='OVH_CART_ID',
                 required=True)
 @click.option('--duration', '-d',
               default='P1M',
@@ -71,9 +73,10 @@ def servers(ctx):
     s.show_server_list()
 
 @cli.command()
-@click.argument('cart',
-                required=True)
 @click.argument('item',
+                required=True)
+@click.argument('cart',
+                envvar='OVH_CART_ID',
                 required=True)
 @click.pass_context
 def config(ctx, cart, item):
@@ -88,13 +91,14 @@ def config(ctx, cart, item):
     s.show_item_required_config(item)
 
 @cli.command()
-@click.argument('cart',
-                required=True)
 @click.argument('item',
                 required=True)
 @click.argument('label',
                 required=True)
 @click.argument('value',
+                required=True)
+@click.argument('cart',
+                envvar='OVH_CART_ID',
                 required=True)
 @click.pass_context
 def config_add(ctx, cart, item, label, value):
@@ -110,9 +114,10 @@ def config_add(ctx, cart, item, label, value):
     s.add_item_config(item, label, value)
 
 @cli.command()
-@click.argument('cart',
-                required=True)
 @click.argument('item',
+                required=True)
+@click.argument('cart',
+                envvar='OVH_CART_ID',
                 required=True)
 @click.pass_context
 def config_get(ctx, cart, item):
@@ -127,6 +132,7 @@ def config_get(ctx, cart, item):
 
 @cli.command()
 @click.argument('cart',
+                envvar='OVH_CART_ID',
                 required=True)
 @click.option('--waive-retractation-period', '-w',
               default=False)
@@ -141,6 +147,7 @@ def checkout(ctx, cart, waive_retractation_period):
     s.assign_cart()
     url = s.checkout_cart(waive_retractation_period)
     click.echo(url)
+    click.echo('unset OVH_CART_ID')
 
 if __name__ == "__main__":
     cli(obj={})
